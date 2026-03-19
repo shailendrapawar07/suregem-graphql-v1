@@ -1,0 +1,9 @@
+extend type Query {
+  diamond(id: ID!): Diamond!
+}
+
+type Diamond {
+  id: ID!
+  color: String!
+  clarity: String!
+}

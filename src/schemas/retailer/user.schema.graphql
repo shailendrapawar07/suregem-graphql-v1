@@ -1,0 +1,63 @@
+type User {
+  id: ID!
+  firstName: String
+  lastName: String
+  email: String!
+  phone: String!
+  address: String
+  city: String
+  state: String
+  zip: String
+  isEmailVerified: Boolean!
+  isPhoneVerified: Boolean!
+  updatedBy: String
+  createdAt: String!
+  updatedAt: String!
+  userType: UserType
+}
+
+type UserResponse {
+  id: String
+  email: String
+  phone: String
+  isEmailVerified: Boolean!
+  isPhoneVerified: Boolean!
+  createdAt: String!
+  updatedAt: String!
+}
+
+#  RegisterRequest represents the request for user registration
+input RegisterInput {
+  firstName: String!
+  lastName: String
+  email: String!
+  phone: String!
+  password: String!
+}
+# LoginRequest represents the request for user login
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+#  LoginResponse represents the response body for user login
+enum CompanyType {
+  MERCHANT
+  RETAILER
+}
+enum BusinessType {
+  MERCHANT
+  RETAILER
+}
+
+type LoginResponse {
+  user: User!
+  companyCreated: Boolean!
+  companyType: BusinessType
+}
+
+# Resolvers Schema================
+extend type Mutation {
+  Register(input: RegisterInput!): User
+  Login(input: LoginInput!): LoginResponse
+}

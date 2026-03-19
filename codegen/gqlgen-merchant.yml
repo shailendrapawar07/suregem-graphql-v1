@@ -1,0 +1,19 @@
+schema:
+  - src/schemas/base.graphql
+  - src/schemas/merchant/schema.graphql
+
+exec:
+  filename: src/schemas/merchant/generated.go
+  package: merchant
+
+model:
+  filename: src/schemas/merchant/models_gen.go
+  package: merchant
+
+resolver:
+  layout: follow-schema
+  dir: src/internal/merchant
+  package: merchant
+
+autobind:
+  - "suregem/src/common"

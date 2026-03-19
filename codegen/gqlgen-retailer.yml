@@ -1,0 +1,20 @@
+schema:
+  - src/schemas/base.graphql
+  # - src/schemas/retailer/schema.graphql
+  - src/schemas/retailer/**/*.graphql
+
+exec:
+  filename: src/schemas/retailer/generated.go
+  package: retailer
+
+model:
+  filename: src/schemas/retailer/models_gen.go
+  package: retailer
+
+resolver:
+  layout: follow-schema
+  dir: src/internal/retailer
+  package: retailer
+
+autobind:
+  - "suregem/src/common"
