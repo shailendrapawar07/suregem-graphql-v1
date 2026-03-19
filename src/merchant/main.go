@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"suregem/src/config"
 	"suregem/src/internal/merchant"
 	merchantSchema "suregem/src/schemas/merchant"
 
@@ -10,6 +12,10 @@ import (
 )
 
 func main() {
+
+	//load configs
+	cfg := config.Load()
+
 	r := gin.Default()
 
 	srv := handler.NewDefaultServer(
@@ -27,5 +33,9 @@ func main() {
 	// Playground
 	r.GET("/", gin.WrapH(playground.Handler("Merchant GraphQL", "/query")))
 
-	r.Run(":8081")
+	fmt.Println("GraphQL server: MERCHENT")             // 4002
+	fmt.Println("Target server URL:=>", cfg.APIBaseURL) // http://localhost:8080/api/v1
+	fmt.Println("Is Production:=>", cfg.IsProd())
+
+	r.Run(":" + cfg.Merchant.Port)
 }

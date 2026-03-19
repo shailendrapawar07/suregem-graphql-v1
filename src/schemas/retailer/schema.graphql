@@ -3,8 +3,8 @@ extend type Query {
 }
 
 type Diamond {
-    id: ID!
-    color: String!
-    clarity: String!
-    measurements: String!
+  id: ID!
+  color: String!
+  clarity: String!
+  measurements: String!
 }

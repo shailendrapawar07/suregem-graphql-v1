@@ -12,11 +12,20 @@ import (
 )
 
 // Empty is the resolver for the _empty field.
+func (r *mutationResolver) Empty(ctx context.Context) (*string, error) {
+	panic(fmt.Errorf("not implemented: Empty - _empty"))
+}
+
+// Empty is the resolver for the _empty field.
 func (r *queryResolver) Empty(ctx context.Context) (*string, error) {
 	panic(fmt.Errorf("not implemented: Empty - _empty"))
 }
 
+// Mutation returns retailer.MutationResolver implementation.
+func (r *Resolver) Mutation() retailer.MutationResolver { return &mutationResolver{r} }
+
 // Query returns retailer.QueryResolver implementation.
 func (r *Resolver) Query() retailer.QueryResolver { return &queryResolver{r} }
 
+type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }

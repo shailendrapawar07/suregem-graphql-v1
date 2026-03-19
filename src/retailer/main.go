@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"suregem/src/config"
 	"suregem/src/internal/retailer"
 	retailerSchema "suregem/src/schemas/retailer"
 
@@ -10,12 +12,15 @@ import (
 )
 
 func main() {
+	//load config
+	cfg := config.Load()
+
 	r := gin.Default()
 
 	srv := handler.NewDefaultServer(
 		retailerSchema.NewExecutableSchema(
 			retailerSchema.Config{
-				Resolvers: &retailer.Resolver{},
+				Resolvers: retailer.NewResolver(cfg),
 			},
 		),
 	)
@@ -25,5 +30,9 @@ func main() {
 
 	r.GET("/", gin.WrapH(playground.Handler("Retailer GraphQL", "/query")))
 
-	r.Run(":8082")
+	fmt.Println("GraphQL server: RETAILER")                 // 4002
+	fmt.Println("Target server URL:=====>", cfg.APIBaseURL) // http://localhost:8080/api/v1
+	fmt.Println("Is Production:=====>", cfg.IsProd())
+
+	r.Run(":" + cfg.Merchant.Port)
 }
