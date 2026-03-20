@@ -1,9 +1,3 @@
-# type User {
-#   id: ID!
-#   email: String!
-#   name: String!
-# }
-
 type Query {
   _empty: String
 }
@@ -12,19 +6,22 @@ type Mutation {
   _empty: String
 }
 
-# Enums
+# ============================================
+#=============== ENUMS =======================
 enum UserType {
   MERCHANT
   RETAILER
 }
 
-# ========User Schema=========>
+# ===================================================>
+# ========COMMON SCHEMA DEFINITION===================>
 type User {
   id: ID!
   firstName: String
   lastName: String
   email: String!
   phone: String!
+
   isEmailVerified: Boolean!
   isPhoneVerified: Boolean!
   createdAt: String!

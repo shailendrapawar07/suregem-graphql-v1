@@ -47,6 +47,10 @@ type LoginSuccess {
   message: String!
   data: LoginData!
 }
+type LogoutSuccess {
+  success: Boolean!
+  message: String!
+}
 
 union LoginResult = LoginSuccess | LoginError
 
@@ -54,4 +58,5 @@ union LoginResult = LoginSuccess | LoginError
 # =============================  RESOLVERS DEFINITION ====================================
 extend type Mutation {
   Login(input: LoginInput!): LoginResult!
+  Logout: LogoutSuccess!
 }

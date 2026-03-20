@@ -46,6 +46,11 @@ type LoginSuccess struct {
 
 func (LoginSuccess) IsLoginResult() {}
 
+type LogoutSuccess struct {
+	Success bool   `json:"success"`
+	Message string `json:"message"`
+}
+
 type Mutation struct {
 }
 

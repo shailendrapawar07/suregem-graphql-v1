@@ -59,9 +59,15 @@ type ComplexityRoot struct {
 		Success func(childComplexity int) int
 	}
 
+	LogoutSuccess struct {
+		Message func(childComplexity int) int
+		Success func(childComplexity int) int
+	}
+
 	Mutation struct {
-		Empty func(childComplexity int) int
-		Login func(childComplexity int, input LoginInput) int
+		Empty  func(childComplexity int) int
+		Login  func(childComplexity int, input LoginInput) int
+		Logout func(childComplexity int) int
 	}
 
 	Query struct {
@@ -100,6 +106,7 @@ type ComplexityRoot struct {
 type MutationResolver interface {
 	Empty(ctx context.Context) (*string, error)
 	Login(ctx context.Context, input LoginInput) (LoginResult, error)
+	Logout(ctx context.Context) (*LogoutSuccess, error)
 }
 type QueryResolver interface {
 	Empty(ctx context.Context) (*string, error)
@@ -196,6 +203,19 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.LoginSuccess.Success(childComplexity), true
 
+	case "LogoutSuccess.message":
+		if e.ComplexityRoot.LogoutSuccess.Message == nil {
+			break
+		}
+
+		return e.ComplexityRoot.LogoutSuccess.Message(childComplexity), true
+	case "LogoutSuccess.success":
+		if e.ComplexityRoot.LogoutSuccess.Success == nil {
+			break
+		}
+
+		return e.ComplexityRoot.LogoutSuccess.Success(childComplexity), true
+
 	case "Mutation._empty":
 		if e.ComplexityRoot.Mutation.Empty == nil {
 			break
@@ -213,6 +233,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.Login(childComplexity, args["input"].(LoginInput)), true
+	case "Mutation.Logout":
+		if e.ComplexityRoot.Mutation.Logout == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Mutation.Logout(childComplexity), true
 
 	case "Query.diamond":
 		if e.ComplexityRoot.Query.Diamond == nil {
@@ -439,13 +465,7 @@ func sourceData(filename string) string {
 }
 
 var sources = []*ast.Source{
-	{Name: "../base.graphql", Input: `# type User {
-#   id: ID!
-#   email: String!
-#   name: String!
-# }
-
-type Query {
+	{Name: "../base.graphql", Input: `type Query {
   _empty: String
 }
 
@@ -453,19 +473,22 @@ type Mutation {
   _empty: String
 }
 
-# Enums
+# ============================================
+#=============== ENUMS =======================
 enum UserType {
   MERCHANT
   RETAILER
 }
 
-# ========User Schema=========>
+# ===================================================>
+# ========COMMON SCHEMA DEFINITION===================>
 type User {
   id: ID!
   firstName: String
   lastName: String
   email: String!
   phone: String!
+
   isEmailVerified: Boolean!
   isPhoneVerified: Boolean!
   createdAt: String!
@@ -951,6 +974,64 @@ func (ec *executionContext) fieldContext_LoginSuccess_data(_ context.Context, fi
 	return fc, nil
 }
 
+func (ec *executionContext) _LogoutSuccess_success(ctx context.Context, field graphql.CollectedField, obj *LogoutSuccess) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LogoutSuccess_success,
+		func(ctx context.Context) (any, error) {
+			return obj.Success, nil
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LogoutSuccess_success(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LogoutSuccess",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LogoutSuccess_message(ctx context.Context, field graphql.CollectedField, obj *LogoutSuccess) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LogoutSuccess_message,
+		func(ctx context.Context) (any, error) {
+			return obj.Message, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LogoutSuccess_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LogoutSuccess",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation__empty(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -1017,6 +1098,41 @@ func (ec *executionContext) fieldContext_Mutation_Login(ctx context.Context, fie
 	if fc.Args, err = ec.field_Mutation_Login_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_Logout(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_Logout,
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Mutation().Logout(ctx)
+		},
+		nil,
+		ec.marshalNLogoutSuccess2ᚖsuregemᚋsrcᚋschemasᚋretailerᚐLogoutSuccess,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_Logout(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "success":
+				return ec.fieldContext_LogoutSuccess_success(ctx, field)
+			case "message":
+				return ec.fieldContext_LogoutSuccess_message(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type LogoutSuccess", field.Name)
+		},
 	}
 	return fc, nil
 }
@@ -3500,6 +3616,50 @@ func (ec *executionContext) _LoginSuccess(ctx context.Context, sel ast.Selection
 	return out
 }
 
+var logoutSuccessImplementors = []string{"LogoutSuccess"}
+
+func (ec *executionContext) _LogoutSuccess(ctx context.Context, sel ast.SelectionSet, obj *LogoutSuccess) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, logoutSuccessImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("LogoutSuccess")
+		case "success":
+			out.Values[i] = ec._LogoutSuccess_success(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "message":
+			out.Values[i] = ec._LogoutSuccess_message(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var mutationImplementors = []string{"Mutation"}
 
 func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -3526,6 +3686,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "Login":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_Login(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "Logout":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_Logout(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -4225,6 +4392,20 @@ func (ec *executionContext) marshalNLoginResult2suregemᚋsrcᚋschemasᚋretail
 		return graphql.Null
 	}
 	return ec._LoginResult(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNLogoutSuccess2suregemᚋsrcᚋschemasᚋretailerᚐLogoutSuccess(ctx context.Context, sel ast.SelectionSet, v LogoutSuccess) graphql.Marshaler {
+	return ec._LogoutSuccess(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNLogoutSuccess2ᚖsuregemᚋsrcᚋschemasᚋretailerᚐLogoutSuccess(ctx context.Context, sel ast.SelectionSet, v *LogoutSuccess) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._LogoutSuccess(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v any) (string, error) {

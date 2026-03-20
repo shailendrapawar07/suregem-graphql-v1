@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"suregem/src/config"
 	"suregem/src/internal/retailer"
+	"suregem/src/middleware"
 	retailerSchema "suregem/src/schemas/retailer"
 
 	"github.com/99designs/gqlgen/graphql/handler"
@@ -16,6 +17,9 @@ func main() {
 	cfg := config.Load()
 
 	r := gin.Default()
+
+	// Attach middleware here
+	r.Use(middleware.ContextMiddleware())
 
 	srv := handler.NewDefaultServer(
 		retailerSchema.NewExecutableSchema(

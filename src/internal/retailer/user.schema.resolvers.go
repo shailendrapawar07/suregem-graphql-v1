@@ -7,69 +7,33 @@ package retailer
 
 import (
 	"context"
+	"suregem/src/middleware"
 	"suregem/src/schemas/retailer"
 	"suregem/src/utils"
 )
 
 // Login is the resolver for the Login field.
 func (r *mutationResolver) Login(ctx context.Context, input retailer.LoginInput) (retailer.LoginResult, error) {
-	var apiResp map[string]interface{}
-	err := r.client.Post("/user/login", map[string]string{
-		"email":    input.Email,
-		"password": input.Password,
-	}, &apiResp)
 
-	//network  level check
-	if err != nil {
-		return &retailer.LoginError{
-			Message: "Login failed",
+	return nil, nil
+}
+
+// Logout is the resolver for the Logout field.
+func (r *mutationResolver) Logout(ctx context.Context) (*retailer.LogoutSuccess, error) {
+	appCtx := middleware.GetAppContext(ctx)
+	if appCtx == nil {
+		return &retailer.LogoutSuccess{
 			Success: false,
+			Message: "Context missing",
 		}, nil
 	}
 
-	// ✅ SAFE extraction
-	data, ok := apiResp["data"].(map[string]interface{})
-	if !ok {
-		return &retailer.LoginError{
-			Success: false,
-			Message: "Invalid response (no data)",
-		}, nil
-	}
+	// clear cookies
+	utils.ClearCookie(appCtx.Writer, "dat")
+	utils.ClearCookie(appCtx.Writer, "drt")
 
-	userMap, ok := data["user"].(map[string]interface{})
-	if !ok {
-		return &retailer.LoginError{
-			Success: false,
-			Message: "Invalid response (no user)",
-		}, nil
-	}
-
-	user := &retailer.User{
-		ID:              userMap["id"].(string),
-		FirstName:       utils.GetStringPtr(userMap, "first_name"),
-		LastName:        utils.GetStringPtr(userMap, "last_name"),
-		Email:           userMap["email"].(string),
-		Phone:           userMap["phone"].(string),
-		IsEmailVerified: userMap["is_email_verified"].(bool),
-		IsPhoneVerified: userMap["is_phone_verified"].(bool),
-		CreatedAt:       userMap["created_at"].(string),
-		UpdatedAt:       userMap["updated_at"].(string),
-	}
-
-	// ✅ Company type handling
-	var companyType *retailer.CompanyType
-	if ct, ok := data["company_type"].(string); ok {
-		ctEnum := retailer.CompanyType(ct)
-		companyType = &ctEnum
-	}
-
-	return &retailer.LoginSuccess{
-		Message: "Login successful",
+	return &retailer.LogoutSuccess{
 		Success: true,
-		Data: &retailer.LoginData{
-			User:           user,
-			CompanyCreated: data["company_created"].(bool),
-			CompanyType:    companyType,
-		},
+		Message: "Logged out successfully",
 	}, nil
 }
