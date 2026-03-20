@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 	"suregem/src/pkg/httpclient"
 	"suregem/src/schemas/retailer"
@@ -37,8 +36,8 @@ func (s *authServiceImpl) Login(ctx context.Context, input retailer.LoginInput) 
 		return nil, res, errors.New(err.Error())
 	}
 
-	fmt.Println("result in resolver====>")
-	fmt.Println(responseBody)
+	// fmt.Println("result in resolver====>")
+	// fmt.Println(responseBody)
 
 	return responseBody, res, nil
 }

@@ -32,6 +32,7 @@ func (r *mutationResolver) Login(ctx context.Context, input retailer.LoginInput)
 	fmt.Println("body", body)
 
 	return nil, nil
+
 }
 
 // Logout is the resolver for the Logout field.
