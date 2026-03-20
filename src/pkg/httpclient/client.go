@@ -23,15 +23,15 @@ func New(baseURL string) *Client {
 	}
 }
 
-func (c *Client) Post(path string, body any, response any) error {
+func (c *Client) Post(path string, body any, responseBody any) (*http.Response, error) {
 	jsonBody, err := json.Marshal(body)
 	if err != nil {
-		return fmt.Errorf("failed to marshal request: %w", err)
+		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
 	req, err := http.NewRequest(http.MethodPost, c.BaseURL+path, bytes.NewBuffer(jsonBody))
 	if err != nil {
-		return fmt.Errorf("failed to create request: %w", err)
+		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
 	req.Header.Set("Content-Type", "application/json")
@@ -39,15 +39,19 @@ func (c *Client) Post(path string, body any, response any) error {
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return fmt.Errorf("failed to make request: %w", err)
+		return nil, fmt.Errorf("failed to make request: %w", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
-	return json.NewDecoder(resp.Body).Decode(response)
+	//decoded response body
+	responseBody = json.NewDecoder(resp.Body).Decode(responseBody)
+
+	return resp, nil
+
 }
 
 func (c *Client) Get(path string, response any) error {

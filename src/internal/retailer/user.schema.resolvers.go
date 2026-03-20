@@ -7,6 +7,7 @@ package retailer
 
 import (
 	"context"
+	"fmt"
 	"suregem/src/middleware"
 	"suregem/src/schemas/retailer"
 	"suregem/src/utils"
@@ -14,6 +15,21 @@ import (
 
 // Login is the resolver for the Login field.
 func (r *mutationResolver) Login(ctx context.Context, input retailer.LoginInput) (retailer.LoginResult, error) {
+
+	// 1:  call authService
+	body, httpResponse, err := r.authService.Login(ctx, input)
+	if err != nil {
+		return &retailer.LoginError{
+			Message: err.Error(),
+			Success: false,
+		}, nil
+	}
+
+	// 2: forward cookies + headers to client
+	utils.ForwardBackendResponse(ctx, httpResponse)
+
+	//4: map response
+	fmt.Println("body", body)
 
 	return nil, nil
 }
