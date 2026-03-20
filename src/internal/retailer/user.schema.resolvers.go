@@ -7,50 +7,69 @@ package retailer
 
 import (
 	"context"
-	"fmt"
-	"log"
 	"suregem/src/schemas/retailer"
+	"suregem/src/utils"
 )
 
-// Register is the resolver for the Register field.
-func (r *mutationResolver) Register(ctx context.Context, input retailer.RegisterInput) (*retailer.User, error) {
-	fmt.Print(input)
-	panic(fmt.Errorf("not implemented: Register - Register"))
-}
-
 // Login is the resolver for the Login field.
-func (r *mutationResolver) Login(ctx context.Context, input retailer.LoginInput) (*retailer.LoginResponse, error) {
-
-	fmt.Print("called login grph")
+func (r *mutationResolver) Login(ctx context.Context, input retailer.LoginInput) (retailer.LoginResult, error) {
 	var apiResp map[string]interface{}
 	err := r.client.Post("/user/login", map[string]string{
 		"email":    input.Email,
 		"password": input.Password,
 	}, &apiResp)
 
+	//network  level check
 	if err != nil {
-		log.Println("login failed:", err)
-		return nil, err
+		return &retailer.LoginError{
+			Message: "Login failed",
+			Success: false,
+		}, nil
 	}
 
-	log.Println("login response:", apiResp)
-	return nil, nil
+	// ✅ SAFE extraction
+	data, ok := apiResp["data"].(map[string]interface{})
+	if !ok {
+		return &retailer.LoginError{
+			Success: false,
+			Message: "Invalid response (no data)",
+		}, nil
+	}
 
-	// firstName := "John"
-	// companyType := retailer.CompanyType("RETAILER")
+	userMap, ok := data["user"].(map[string]interface{})
+	if !ok {
+		return &retailer.LoginError{
+			Success: false,
+			Message: "Invalid response (no user)",
+		}, nil
+	}
 
-	// return &retailer.LoginResponse{
-	// 	User: &retailer.User{
-	// 		ID:              "123",
-	// 		FirstName:       &firstName,
-	// 		Email:           "john@gmail.com",
-	// 		Phone:           "+1234567890",
-	// 		IsEmailVerified: true,
-	// 		IsPhoneVerified: false,
-	// 		CreatedAt:       "2024-01-15T10:30:00Z",
-	// 		UpdatedAt:       "2024-01-15T10:30:00Z",
-	// 	},
-	// 	CompanyCreated: true,
-	// 	CompanyType:    &companyType,
-	// }, nil
+	user := &retailer.User{
+		ID:              userMap["id"].(string),
+		FirstName:       utils.GetStringPtr(userMap, "first_name"),
+		LastName:        utils.GetStringPtr(userMap, "last_name"),
+		Email:           userMap["email"].(string),
+		Phone:           userMap["phone"].(string),
+		IsEmailVerified: userMap["is_email_verified"].(bool),
+		IsPhoneVerified: userMap["is_phone_verified"].(bool),
+		CreatedAt:       userMap["created_at"].(string),
+		UpdatedAt:       userMap["updated_at"].(string),
+	}
+
+	// ✅ Company type handling
+	var companyType *retailer.CompanyType
+	if ct, ok := data["company_type"].(string); ok {
+		ctEnum := retailer.CompanyType(ct)
+		companyType = &ctEnum
+	}
+
+	return &retailer.LoginSuccess{
+		Message: "Login successful",
+		Success: true,
+		Data: &retailer.LoginData{
+			User:           user,
+			CompanyCreated: data["company_created"].(bool),
+			CompanyType:    companyType,
+		},
+	}, nil
 }

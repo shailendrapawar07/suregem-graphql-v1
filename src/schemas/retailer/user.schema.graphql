@@ -1,4 +1,11 @@
-#  RegisterRequest represents the request for user registration
+enum CompanyType {
+  MERCHANT
+  RETAILER
+}
+# ========================================================================================
+# =========================== INPUTS DEFINITION ==========================================
+
+# 1: RegisterInput represents the request payload for user registration
 input RegisterInput {
   firstName: String!
   lastName: String
@@ -6,26 +13,45 @@ input RegisterInput {
   phone: String!
   password: String!
 }
-# LoginRequest represents the request for user login
+# 2: LoginInput  represents the request payload for user login
 input LoginInput {
   email: String!
   password: String!
 }
 
-#  LoginResponse represents the response body for user login
-enum CompanyType {
-  MERCHANT
-  RETAILER
-}
+# ========================================================================================
+# ============================ DATA DEFINITION============================================
 
-type LoginResponse {
+type LoginData {
   user: User!
   companyCreated: Boolean!
   companyType: CompanyType
 }
 
-# Resolvers Schema================
+# ========================================================================================
+# ============================RESPONSE DEFINITION=========================================
+
+#  LoginError represents the response body for user's Un-successfull login
+type LoginError {
+  success: Boolean!
+  message: String!
+}
+type RegisterError {
+  success: Boolean!
+  message: String!
+}
+
+#  LoginSuccess represents the response body for user successfull login
+type LoginSuccess {
+  success: Boolean!
+  message: String!
+  data: LoginData!
+}
+
+union LoginResult = LoginSuccess | LoginError
+
+# ========================================================================================
+# =============================  RESOLVERS DEFINITION ====================================
 extend type Mutation {
-  Register(input: RegisterInput!): User
-  Login(input: LoginInput!): LoginResponse
+  Login(input: LoginInput!): LoginResult!
 }

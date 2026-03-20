@@ -9,6 +9,10 @@ import (
 	"strconv"
 )
 
+type LoginResult interface {
+	IsLoginResult()
+}
+
 type Diamond struct {
 	ID           string `json:"id"`
 	Color        string `json:"color"`
@@ -16,21 +20,41 @@ type Diamond struct {
 	Measurements string `json:"measurements"`
 }
 
-type LoginInput struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
-type LoginResponse struct {
+type LoginData struct {
 	User           *User        `json:"user"`
 	CompanyCreated bool         `json:"companyCreated"`
 	CompanyType    *CompanyType `json:"companyType,omitempty"`
 }
 
+type LoginError struct {
+	Success bool   `json:"success"`
+	Message string `json:"message"`
+}
+
+func (LoginError) IsLoginResult() {}
+
+type LoginInput struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type LoginSuccess struct {
+	Success bool       `json:"success"`
+	Message string     `json:"message"`
+	Data    *LoginData `json:"data"`
+}
+
+func (LoginSuccess) IsLoginResult() {}
+
 type Mutation struct {
 }
 
 type Query struct {
+}
+
+type RegisterError struct {
+	Success bool   `json:"success"`
+	Message string `json:"message"`
 }
 
 type RegisterInput struct {
@@ -42,21 +66,15 @@ type RegisterInput struct {
 }
 
 type User struct {
-	ID              string    `json:"id"`
-	FirstName       *string   `json:"firstName,omitempty"`
-	LastName        *string   `json:"lastName,omitempty"`
-	Email           string    `json:"email"`
-	Phone           string    `json:"phone"`
-	Address         *string   `json:"address,omitempty"`
-	City            *string   `json:"city,omitempty"`
-	State           *string   `json:"state,omitempty"`
-	Zip             *string   `json:"zip,omitempty"`
-	IsEmailVerified bool      `json:"isEmailVerified"`
-	IsPhoneVerified bool      `json:"isPhoneVerified"`
-	UpdatedBy       *string   `json:"updatedBy,omitempty"`
-	CreatedAt       string    `json:"createdAt"`
-	UpdatedAt       string    `json:"updatedAt"`
-	UserType        *UserType `json:"userType,omitempty"`
+	ID              string  `json:"id"`
+	FirstName       *string `json:"firstName,omitempty"`
+	LastName        *string `json:"lastName,omitempty"`
+	Email           string  `json:"email"`
+	Phone           string  `json:"phone"`
+	IsEmailVerified bool    `json:"isEmailVerified"`
+	IsPhoneVerified bool    `json:"isPhoneVerified"`
+	CreatedAt       string  `json:"createdAt"`
+	UpdatedAt       string  `json:"updatedAt"`
 }
 
 type UserResponse struct {
